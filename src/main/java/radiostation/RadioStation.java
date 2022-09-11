@@ -1,50 +1,38 @@
 package radiostation;
 
 import broadcasts.Broadcast;
-import hosts.Host;
+import streams.AbstractStream;
 
-import java.time.Duration;
 import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class RadioStation {
-    Queue<Broadcast> broadcastList;
-    Queue<Host> hostList;
-    Duration mainDuration;
+public abstract class RadioStation {
 
-    public RadioStation() {
-        broadcastList = new ArrayDeque<>();
-        hostList = new ArrayDeque<>();
+    protected Deque<Broadcast> broadcasts;
+
+    private Map<Broadcast, Long> earned = new LinkedHashMap<>();
+
+    protected RadioStation() {
+        broadcasts = new ArrayDeque<>();
     }
 
-    public void addBroadcast(Broadcast broadcast) {
-        if(mainDuration.toMinutes() <= 0){
-            mainDuration = Duration.ofMinutes(0);
-            return;
+    public abstract void play();
+
+    public Map<Broadcast, Long> earnedFromBroadcast() {
+        for (Broadcast broadcast : broadcasts) {
+            earned.put(broadcast, broadcast.earned());
         }
-        if(broadcast.getDuration() > mainDuration.toMinutes()){
-            System.out.println("Duration " + broadcast.getDuration() + " too long. " + "Remain time left is " + mainDuration.toMinutes() );
-            return;
-        }
-        broadcastList.add(broadcast);
-        mainDuration = Duration.ofMinutes(mainDuration.toMinutes() - broadcast.getDuration());
+        return earned;
     }
 
-    public Broadcast getCurrentBroadcast() {
-//        mainDuration = Duration.ofMinutes(mainDuration.toMinutes() + broadcastList.peek().getDuration());
-        return broadcastList.poll();
+    public AbstractStream getCurrentStream(Broadcast broadcast) {
+        return broadcast.getStreams().peek();
     }
 
-    public void play() {
-        broadcastList.forEach(System.out::println);
-    }
-
-    public Broadcast createMainBroadcast(Duration duration) {
-        this.mainDuration = duration;
-        return new Broadcast(duration);
-    }
-
-    public long getRemainMinutesOfBroadcast() {
-        return mainDuration.toMinutes();
+    public RadioStation addBroadcast(Broadcast broadcast) {
+        broadcasts.add(broadcast);
+        return this;
     }
 }
