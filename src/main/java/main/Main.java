@@ -1,28 +1,30 @@
 package main;
 
 import broadcasts.Broadcast;
+import factory.Factory;
 import radiostation.AustrianRadioStation;
 import radiostation.RadioStation;
-import streams.Advertising;
-import streams.Interview;
 import streams.Song;
 
 public class Main {
     public static void main(String[] args) {
+        //pattern Singleton используется для создания одного объектра радио
         RadioStation radioStation = AustrianRadioStation.getAustrianRadioStation();
 
         Broadcast morning = new Broadcast(30, "Morning");
         Broadcast afternoon = new Broadcast(50, "Afternoon");
         Broadcast evening = new Broadcast(60, "Evening");
 
-        morning.createStream(new Song(3, "Eminem", "The way I am"));
-        morning.createStream(new Advertising(3, "Loreal"));
-        morning.createStream(new Song(3, "Eminem", "Cleaning of my closet"));
+        //pattern Builder для создания объектов песни
+        morning.createStream(Song.builder().duration(3).singerName("Eminem").songName("The way I am").build());
+        //pattern Factory Method для создания объектов интервью и рекламы
+        morning.createStream(Factory.getStream(Factory.StreamType.ADVERTISING, 3, "Loreal"));
+        morning.createStream(Song.builder().duration(3).singerName("Eminem").songName("Cleaning of my closet").build());
 
-        afternoon.createStream(new Song(5, "Pink", "So What"));
-        afternoon.createStream(new Interview(11, "Steven King"));
+        afternoon.createStream(Song.builder().duration(5).singerName("Pink").songName("So What").build());
+        afternoon.createStream(Factory.getStream(Factory.StreamType.INTERVIEW, 11, "Steven King"));
 
-        evening.createStream(new Song(4, "Pink", "Funhouse"));
+        evening.createStream(Song.builder().duration(4).singerName("Pink").songName("Funhouse").build());
 
         radioStation.addBroadcast(morning).addBroadcast(afternoon).addBroadcast(evening);
         radioStation.play();
